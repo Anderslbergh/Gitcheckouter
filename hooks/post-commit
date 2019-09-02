@@ -1,0 +1,11 @@
+#!/bin/sh
+#husky 0.14.3
+slackWebhook="https://hooks.slack.com/services/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"
+repoHost="https://github.com/"
+repoUrl=`git config --get remote.origin.url`
+repoBase=${repoUrl#"$repoHost"}
+
+lastCommitMsg=`git log -1 --pretty=%B`
+
+branchName=`git rev-parse --abbrev-ref HEAD`
+curl -s -X POST -H 'Content-type: application/json' --data '{"text":"`'$repoBase' \t Commit \t '$branchName' \t '$lastCommitMsg'`"}' $slackWebhook >/dev/null 2>&1
