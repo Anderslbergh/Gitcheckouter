@@ -5,7 +5,7 @@ repoHost="https://github.com/"
 repoUrl=`git config --get remote.origin.url`
 repoBase=${repoUrl#"$repoHost"}
 
-lastCommitMsg="TEST"
+lastCommitMsg=${git log -1 --pretty=%B}
 
 branchName=`git rev-parse --abbrev-ref HEAD`
 curl -s -X POST -H 'Content-type: application/json' --data '{"text":"`'$repoBase' \t Commit \t '$branchName' \t '$lastCommitMsg'`"}' $slackWebhook >/dev/null 2>&1
