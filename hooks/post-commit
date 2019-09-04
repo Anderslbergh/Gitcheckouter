@@ -1,6 +1,13 @@
 #!/bin/sh
 #husky 0.14.3
-slackWebhook="https://hooks.slack.com/services/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"
+
+execution_dir=$PWD
+
+cd "$hooks_dir"
+slackWebhook=`cat ../slackWebHook.conf`
+
+
+cd "$execution_dir"
 repoHost="https://github.com/"
 repoUrl=`git config --get remote.origin.url`
 repoBase=${repoUrl#"$repoHost"}

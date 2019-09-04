@@ -9,6 +9,8 @@ hooks_dir=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
 cd "$hooks_dir"
 
+slackWebhook=`cat ../slackWebHook.conf`
+
 LASTGITCHECKERDATETIMESTAMP=`cat ../timestamp.conf`
 GITCHECKERDATETIMESTAMP=$(date +%s)
 
@@ -43,7 +45,6 @@ fi
 
 cd "$execution_dir"
 
-slackWebhook="https://hooks.slack.com/services/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"
 repoHost="https://github.com/"
 repoUrl=`git config --get remote.origin.url`
 repoBase=${repoUrl#"$repoHost"}
