@@ -2,6 +2,7 @@
 #husky 0.14.3
 
 execution_dir=$PWD
+hooks_dir=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
 cd "$hooks_dir"
 slackWebhook=`cat ../slackWebHook.conf`
