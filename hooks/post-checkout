@@ -1,10 +1,58 @@
 #!/bin/sh
 #husky 0.14.3
 
+STARTHOUR=08
+ENDHOUR="T16"
+
+execution_dir=$PWD
+hooks_dir=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+
+cd "$hooks_dir"
+
+LASTGITCHECKERDATETIMESTAMP=`cat ../timestamp.conf`
+GITCHECKERDATETIMESTAMP=$(date +%s)
+
+timestampDiff="$(($GITCHECKERDATETIMESTAMP-$LASTGITCHECKERDATETIMESTAMP))"
+
+if (( $timestampDiff > 12*60*60 ))
+then
+    LASTTIMESTAMPDATE=$(date -ud @$LASTGITCHECKERDATETIMESTAMP +%F)
+    LASTTIMESTAMPENDHOURTIMESTAMP=$(date -d "$LASTTIMESTAMPDATE$ENDHOUR:00:00+00:00" +%s)
+    SECONDSLEFTLASTWORKINGDAY="$(($LASTTIMESTAMPENDHOURTIMESTAMP-$LASTGITCHECKERDATETIMESTAMP))"
+
+    TODAYDATE=$(date +%F)
+    TODAYSTARTINGHOURTIMESTAMP=$(date -d "$TODAYDATE $STARTHOUR:00:00" +%s)
+    timestampDiff="$(($GITCHECKERDATETIMESTAMP-$TODAYSTARTINGHOURTIMESTAMP+$SECONDSLEFTLASTWORKINGDAY))"
+fi
+
+if (( $timestampDiff <= 60))
+then
+    Time="1m"
+elif (( $timestampDiff > 60 && $timestampDiff <= 1200 ))
+then
+    Time="15m"
+elif (( $timestampDiff > 1201 && $timestampDiff <= 2400 ))
+then
+    Time="30m"
+elif (( $timestampDiff > 2401 && $timestampDiff <= 3600 ))
+then
+    Time="1h"
+else
+    Time="$(($timestampDiff/3600))h" 
+fi
+
+cd "$execution_dir"
+
 slackWebhook="https://hooks.slack.com/services/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"
 repoHost="https://github.com/"
 repoUrl=`git config --get remote.origin.url`
 repoBase=${repoUrl#"$repoHost"}
 
 branchName=`git rev-parse --abbrev-ref HEAD`
+
+curl -s -X POST -H 'Content-type: application/json' --data '{"text":"`'$Time'`"}' $slackWebhook >/dev/null 2>&1
 curl -s -X POST -H 'Content-type: application/json' --data '{"text":"`'$repoBase' \t Checkout \t '$branchName'`"}' $slackWebhook >/dev/null 2>&1
+
+cd "$hooks_dir"
+echo $GITCHECKERDATETIMESTAMP > ../timestamp.conf
+cd "$execution_dir"
