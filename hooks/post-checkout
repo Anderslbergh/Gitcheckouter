@@ -43,6 +43,20 @@ else
     Time="$(($timestampDiff/3600))h" 
 fi
 
+exec < /dev/tty
+while true; do
+  read -p "`echo $'\n> '`What are you doing `echo $'\n> '` [1] Developement `echo $'\n> '` [2] Pull request review `echo $'\n> '`:" action
+  if [ "$action" = "" ]; then
+    action='1'
+  fi
+  case $action in
+      [1] ) workType='DEV' break;;
+      [2] ) workType='PR' break;;
+      * ) echo "Please answer with a number";;
+  esac
+done
+
+
 cd "$execution_dir"
 
 repoHost="https://github.com/"
@@ -52,7 +66,7 @@ repoBase=${repoUrl#"$repoHost"}
 branchName=`git rev-parse --abbrev-ref HEAD`
 
 curl -s -X POST -H 'Content-type: application/json' --data '{"text":"`'$Time'`"}' $slackWebhook >/dev/null 2>&1
-curl -s -X POST -H 'Content-type: application/json' --data '{"text":"`'$repoBase' \t Checkout \t '$branchName'`"}' $slackWebhook >/dev/null 2>&1
+curl -s -X POST -H 'Content-type: application/json' --data '{"text":"`'$repoBase' \t '$workType' \t Checkout \t '$branchName'`"}' $slackWebhook >/dev/null 2>&1
 
 cd "$hooks_dir"
 echo $GITCHECKERDATETIMESTAMP > ../timestamp.conf
